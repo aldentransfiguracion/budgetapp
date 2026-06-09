@@ -1,0 +1,67 @@
+// For format details, see https://aka.ms/devcontainer.json. For config options, see the
+// README at: https://github.com/devcontainers/templates/tree/main/src/docker-existing-docker-compose
+{
+  // Name of container
+  "name": "Wise Wealth",
+
+  // Compose file(s) the container uses. The first file is the primary compose file
+  "dockerComposeFile": ["docker-compose.yml"],
+
+  // Name of the container defined in primary compose file
+  "service": "devcontainer",
+
+  // Where VSC opens by default when connected. Defined in 'volumes' in primary compose file
+  "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
+
+  // If you want start specific services in your Docker Compose
+  "runServices": [],
+
+  // Features to add to the dev container. More info: https://containers.dev/features.
+  "features": {},
+
+  // Use 'forwardPorts' to make a list of ports inside the container available locally.
+  "forwardPorts": [3000, 51212],
+  "portsAttributes": {
+    "3000": { "label": "Application port" },
+    "51212": { "label": "Prisma Studio" }
+  },
+
+  // Run commands after the container is created.
+  "postCreateCommand": "pnpm ci && npx prisma generate",
+
+  // Configure tool-specific properties.
+  "customizations": {
+    // Editor-specific customizations for this dev container
+    "vscode": {
+      // VS Code extensions to auto-install in the container
+      "extensions": [
+        "dbaeumer.vscode-eslint", // ESLint support for linting and fixes
+        "esbenp.prettier-vscode", // Prettier support for formatting
+        "EditorConfig.EditorConfig", // Apply .editorconfig rules in the editor
+        "eamodio.gitlens", // Extra Git history and blame tools
+        "streetsidesoftware.code-spell-checker" // Spell-check comments, strings, and docs
+      ],
+
+      // VS Code settings to apply when this container opens
+      "settings": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode", // Use Prettier as the main formatter
+        "editor.formatOnSave": true, // Format files automatically on save
+
+        "editor.codeActionsOnSave": {
+          "source.organizeImports": "explicit", // Organize imports on explicit save
+          "source.fixAll.eslint": "explicit" // Apply ESLint fixes on explicit save
+        },
+        "files.trimFinalNewlines": true, // Remove extra blank lines at EOF
+
+        "js/ts.updateImportsOnFileMove.enabled": "always", // Auto-update imports when files move
+        "js/ts.tsdk.path": "node_modules/typescript/lib", // Use the project's TypeScript version
+        "js/ts.tsdk.promptToUseWorkspaceVersion": true,
+
+        "git.autofetch": "all", // Auto-fetch from all remotes
+        "git.pruneOnFetch": true, // Remove deleted remote branches on fetch
+
+        "remote.autoForwardPorts": false // Do not auto-forward detected ports
+      }
+    }
+  }
+}

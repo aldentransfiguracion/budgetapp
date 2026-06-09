@@ -1,0 +1,90 @@
+# This file defines how multiple containers (aka services) run and work together
+services:
+  # Name of the service
+  devcontainer:
+    # Build image locally instead of pulling it from the Docker registry
+    build:
+      # Relative path of the folder that has the files to build the container
+      context: .
+      # Name of file in the context above which will build the container
+      dockerfile: Dockerfile.dev
+
+    # Mount files OR defines storage that persists outside the container
+    volumes:
+      # "../.." is the relative path of the folder on HOST machine that has our project
+      # "workspaces" is a folder in the CONTAINER
+      # ":cached" assumes host is in charge. This is the default
+      # links them so changes on either side is reflected in the other (called mounting)
+      - ../..:/workspaces:cached
+
+    # Defines restart behavior whenever the container stops (no, always, unless-stopped, on-failure)
+    restart: no
+
+    # Overrides default command so things don't shut down after process ends.
+    command: sleep infinity
+
+    # Ensures one service happens before the other
+    depends_on:
+      # "database" service must happen first
+      database:
+        # The "database" service must pass its health check
+        condition: service_healthy
+
+    # Join the network called "dev-network" to connect to other services on it
+    networks:
+      - dev-network
+
+  # Name of the service
+  database:
+    # Uses ready-made image from Docker registry
+    image: postgres:18
+
+    # Defines restart behavior whenever the container stops (no, always, unless-stopped, on-failure)
+    restart: unless-stopped
+
+    # Join the network called "dev-network" to connect to other services on it
+    networks:
+      - dev-network
+
+    # Tests whether this service is working
+    healthcheck:
+      # The test command
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      # How often it checks
+      interval: 10s
+      # How long it waits before failing a check
+      timeout: 5s
+      # How many failures before concluding that its unhealthy
+      retries: 5
+      # Grace period before startup
+      start_period: 30s
+
+    # Mount files OR defines storage that persists outside the container
+    volumes:
+      - postgres-data:/var/lib/postgresql
+
+    environment:
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_DB: postgres
+
+# Top level networks defines shared network that allows services to comunicate
+networks:
+  # Name of network
+  dev-network:
+    # bridge → single-host communication (most common)
+    # host → container shares host’s network (no isolation)
+    # none → no networking
+    # overlay → multi-host networking (Swarm mode)
+    driver: bridge
+
+# Top level volumes defines named volumes
+volumes:
+  postgres-data:
+
+# Top level secrets defines secrets
+secrets:
+  # Name of secret
+  db_password:
+    # Path of secret
+    file: ./db_password.txt
