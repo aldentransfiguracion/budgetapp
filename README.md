@@ -1,5 +1,34 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
+## Docker Setup
+
+This repo is configured to run the Next.js app and a local PostgreSQL database with Docker Compose.
+
+1. Create a local env file from the example:
+
+```bash
+cp .env.example .env
+```
+
+2. Start the app and database:
+
+```bash
+docker compose up --build
+```
+
+3. Open the app at [http://localhost:3000](http://localhost:3000).
+
+The app container uses `DATABASE_URL=postgresql://budgetapp:budgetapp@db:5432/budgetapp?schema=public`.
+Your local `.env` uses `localhost` instead so Prisma commands run on the host can talk to the same Postgres container.
+
+Useful commands:
+
+```bash
+docker compose down
+docker compose down -v
+pnpm db:studio
+```
+
 ## Getting Started
 
 First, run the development server:
